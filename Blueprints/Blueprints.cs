@@ -165,9 +165,9 @@ namespace Blueprints {
                             Building building;
 
                             if (gameObject != null && (building = gameObject.GetComponent<Building>()) != null && building.Def.IsBuildable() && (originTool == null || originTool.IsActiveLayer(originTool.GetFilterLayerFromGameObject(gameObject)))) {
-                                PrimaryElement primaryElement;
-
-                                if ((primaryElement = building.GetComponent<PrimaryElement>()) != null) {
+                                Deconstructable deconstructable;
+      
+                                if (building.GetComponent<PrimaryElement>() != null && (deconstructable = building.GetComponent<Deconstructable>()) != null) {
                                     Vector2I centre = Grid.CellToXY(GameUtil.NaturalBuildingCell(building));
 
                                     BuildingConfig buildingConfig = new BuildingConfig {
@@ -176,7 +176,7 @@ namespace Blueprints {
                                         Orientation = building.Orientation
                                     };
 
-                                    buildingConfig.SelectedElements.Add(primaryElement.ElementID.CreateTag());
+                                    buildingConfig.SelectedElements.AddRange(deconstructable.constructionElements);
                                     if (building.Def.BuildingComplete.GetComponent<IHaveUtilityNetworkMgr>() != null) {
                                         buildingConfig.Flags = (int) building.Def.BuildingComplete.GetComponent<IHaveUtilityNetworkMgr>().GetNetworkManager()?.GetConnections(cell, false);
                                     }

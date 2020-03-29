@@ -126,7 +126,7 @@ namespace Blueprints {
         public static bool InstantBuild => DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive && SandboxToolParameterMenu.instance.settings.InstantBuild;
 
         private static readonly List<IVisual> foundationVisuals = new List<IVisual>();
-        private static readonly List<IVisual> dependantVisuals = new List<IVisual>();
+        private static readonly List<IVisual> dependentVisuals = new List<IVisual>();
         private static readonly List<ICleanableVisual> cleanableVisuals = new List<ICleanableVisual>();
 
         public static readonly Dictionary<int, CellColorPayload> ColoredCells = new Dictionary<int, CellColorPayload>();
@@ -252,7 +252,7 @@ namespace Blueprints {
             }
 
             else {
-                dependantVisuals.Add(visual);
+                dependentVisuals.Add(visual);
             }
 
             if (visual is ICleanableVisual) {
@@ -264,14 +264,14 @@ namespace Blueprints {
             CleanDirtyVisuals();
 
             foundationVisuals.ForEach(foundationVisual => foundationVisual.MoveVisualizer(Grid.XYToCell(topLeft.x + foundationVisual.Offset.x, topLeft.y + foundationVisual.Offset.y)));
-            dependantVisuals.ForEach(dependantVisual => dependantVisual.MoveVisualizer(Grid.XYToCell(topLeft.x + dependantVisual.Offset.x, topLeft.y + dependantVisual.Offset.y)));
+            dependentVisuals.ForEach(dependentVisual => dependentVisual.MoveVisualizer(Grid.XYToCell(topLeft.x + dependentVisual.Offset.x, topLeft.y + dependentVisual.Offset.y)));
         }
 
         public static void UseBlueprint(Vector2I topLeft) {
             CleanDirtyVisuals();
 
             foundationVisuals.ForEach(foundationVisual => foundationVisual.TryUse(Grid.XYToCell(topLeft.x + foundationVisual.Offset.x, topLeft.y + foundationVisual.Offset.y)));
-            dependantVisuals.ForEach(dependantVisual => dependantVisual.TryUse(Grid.XYToCell(topLeft.x + dependantVisual.Offset.x, topLeft.y + dependantVisual.Offset.y)));
+            dependentVisuals.ForEach(dependentVisual => dependentVisual.TryUse(Grid.XYToCell(topLeft.x + dependentVisual.Offset.x, topLeft.y + dependentVisual.Offset.y)));
         }
 
         public static void ClearVisuals() {
@@ -281,8 +281,8 @@ namespace Blueprints {
             foundationVisuals.ForEach(foundationVisual => Object.DestroyImmediate(foundationVisual.Visualizer));
             foundationVisuals.Clear();
 
-            dependantVisuals.ForEach(dependantVisual => Object.DestroyImmediate(dependantVisual.Visualizer));
-            dependantVisuals.Clear();
+            dependentVisuals.ForEach(dependantVisual => Object.DestroyImmediate(dependantVisual.Visualizer));
+            dependentVisuals.Clear();
         }
 
         public static void CleanDirtyVisuals() {

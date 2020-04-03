@@ -92,6 +92,9 @@ namespace Blueprints {
         public static HashSet<char> BLUEPRINTS_FILE_DISALLOWEDCHARACTERS;
         public static HashSet<char> BLUEPRINTS_PATH_DISALLOWEDCHARACTERS;
 
+        public static HashSet<string> BLUEPRINTS_AUTOFILE_IGNORE = new HashSet<string>();
+        public static FileSystemWatcher BLUEPRINTS_AUTOFILE_WATCHER;
+
         static BlueprintsAssets() {
             BLUEPRINTS_FILE_DISALLOWEDCHARACTERS = new HashSet<char>();
             BLUEPRINTS_FILE_DISALLOWEDCHARACTERS.UnionWith(Path.GetInvalidFileNameChars());
@@ -201,6 +204,7 @@ namespace Blueprints {
                 }
             }
 
+            blueprint.CacheCost();
             return blueprint;
         }
 

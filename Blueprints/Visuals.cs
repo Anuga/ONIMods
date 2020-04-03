@@ -52,7 +52,7 @@ namespace Blueprints {
 
             KBatchedAnimController batchedAnimController = Visualizer.GetComponent<KBatchedAnimController>();
             if (batchedAnimController != null) {
-                batchedAnimController.visibilityType = KAnimControllerBase.VisibilityType.OffscreenUpdate;
+                batchedAnimController.visibilityType = KAnimControllerBase.VisibilityType.Always;
                 batchedAnimController.isMovable = true;
                 batchedAnimController.Offset = buildingConfig.BuildingDef.GetVisualizerOffset() + buildingConfig.BuildingDef.placementPivot;
                 batchedAnimController.TintColour = GetVisualizerColor(cell);
@@ -182,7 +182,7 @@ namespace Blueprints {
 
             KBatchedAnimController batchedAnimController = Visualizer.GetComponent<KBatchedAnimController>();
             if (batchedAnimController != null) {
-                batchedAnimController.visibilityType = KAnimControllerBase.VisibilityType.OffscreenUpdate;
+                batchedAnimController.visibilityType = KAnimControllerBase.VisibilityType.Always;
                 batchedAnimController.isMovable = true;
                 batchedAnimController.Offset = buildingConfig.BuildingDef.GetVisualizerOffset() + buildingConfig.BuildingDef.placementPivot;
             }

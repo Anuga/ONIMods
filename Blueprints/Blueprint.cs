@@ -25,7 +25,7 @@ namespace Blueprints {
         /// The number of blueprints inside the folder.
         /// </summary>
         public int BlueprintCount => contents.Count;
-        
+
         //Backing variable for "SelectedBlueprintIndex" below.
         private int selectedBlueprintIndex = 0;
 
@@ -163,6 +163,11 @@ namespace Blueprints {
         public List<BuildingConfig> BuildingConfiguration { get; } = new List<BuildingConfig>();
 
         /// <summary>
+        /// The true cost of the blueprint given the current game's configuration and the contents of the blueprint.
+        /// </summary>
+        public Dictionary<Tag, float> BlueprintCost { get; private set; } = new Dictionary<Tag, float>();
+
+        /// <summary>
         /// The dig locations contained inside the blueprint.
         /// </summary>
         public List<Vector2I> DigLocations { get; } = new List<Vector2I>();
@@ -207,7 +212,7 @@ namespace Blueprints {
             //Replace all different directory seperators ("/" and "\" for player entries and the alternative system character for redundancy) with the system's directory separator character.
             folder = folder.Replace('\\', Path.DirectorySeparatorChar).Replace('/', Path.DirectorySeparatorChar).Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
             string returnString = "";
-            
+
             //Sanitize sections (invidual folders and files) of the blueprint's path.
             string[] folderSections = folder.Split(Path.DirectorySeparatorChar);
             foreach (string folderSection in folderSections) {
@@ -265,6 +270,7 @@ namespace Blueprints {
                         }
                     }
 
+                    CacheCost();
                     return true;
                 }
 
@@ -285,7 +291,7 @@ namespace Blueprints {
                     using StreamReader reader = File.OpenText(FilePath);
                     using JsonTextReader jsonReader = new JsonTextReader(reader);
 
-                    JObject rootObject = (JObject) JToken.ReadFrom(jsonReader).Root;
+                    JObject rootObject = (JObject)JToken.ReadFrom(jsonReader).Root;
 
                     JToken friendlyNameToken = rootObject.SelectToken("friendlyname");
                     JToken buildingsToken = rootObject.SelectToken("buildings");
@@ -301,7 +307,7 @@ namespace Blueprints {
                         if (buildingTokens != null) {
                             foreach (JToken buildingToken in buildingTokens) {
                                 BuildingConfig buildingConfig = new BuildingConfig();
-                                buildingConfig.ReadJSON((JObject) buildingToken);
+                                buildingConfig.ReadJSON((JObject)buildingToken);
 
                                 BuildingConfiguration.Add(buildingConfig);
                             }
@@ -326,6 +332,8 @@ namespace Blueprints {
                             }
                         }
                     }
+
+                    CacheCost();
                 }
 
                 catch (System.Exception exception) {
@@ -338,7 +346,9 @@ namespace Blueprints {
         /// Writes a blueprint, selecting the correct format (binary or JSON) based upon user configuration.
         /// </summary>
         public void Write() {
+            BlueprintsAssets.BLUEPRINTS_AUTOFILE_IGNORE.Add(FilePath);
             string folder = Path.GetDirectoryName(FilePath);
+
             if (!Directory.Exists(folder)) {
                 Directory.CreateDirectory(folder);
             }
@@ -522,11 +532,52 @@ namespace Blueprints {
         }
 
         /// <summary>
-        /// Returns true if the blueprint contains no instructions (no buildings or dig commands.)
+        /// Returns true if the blueprint contains no instructions (no buildings or dig commands.)    
         /// </summary>
         /// <returns>True if the blueprint is empty, false otherwise</returns>
         public bool IsEmpty() {
             return BuildingConfiguration.Count == 0 && DigLocations.Count == 0;
+        }
+
+        public void CacheCost() {
+            BlueprintCost.Clear();
+
+            foreach (BuildingConfig buildingConfig in BuildingConfiguration) {
+                Recipe buildingRecipe = buildingConfig.BuildingDef.CraftRecipe;
+
+                if(buildingRecipe != null) {
+                    foreach (Recipe.Ingredient ingredient in buildingRecipe.Ingredients) {
+                        if (BlueprintCost.ContainsKey(ingredient.tag)) {
+                            BlueprintCost[ingredient.tag] += ingredient.amount;
+                        }
+
+                        else {
+                            BlueprintCost.Add(ingredient.tag, ingredient.amount);
+                        }
+                    }
+                }
+            }
+        }
+
+        public bool CanAffordToPlace(out Dictionary<Tag, float> remaining) {
+            Dictionary<Tag, float> accessibleResources = WorldInventory.Instance.GetAccessibleAmounts();
+            remaining = BlueprintCost;
+
+            foreach (KeyValuePair<Tag, float> accessibleResource in accessibleResources) {
+                if (remaining.ContainsKey(accessibleResource.Key)) {
+                    remaining[accessibleResource.Key] -= accessibleResource.Value;
+
+                    if (remaining[accessibleResource.Key] <= 0) {
+                        remaining.Remove(accessibleResource.Key);
+
+                        if (remaining.Count == 0) {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
         }
     }
 
@@ -575,7 +626,7 @@ namespace Blueprints {
             binaryWriter.Write(BuildingDef.PrefabID);
             binaryWriter.Write(SelectedElements.Count);
             SelectedElements.ForEach(selectedElement => binaryWriter.Write(selectedElement.GetHash()));
-            binaryWriter.Write((int) Orientation);
+            binaryWriter.Write((int)Orientation);
             binaryWriter.Write(Flags);
         }
 
@@ -619,7 +670,7 @@ namespace Blueprints {
 
             if (Orientation != 0) {
                 jsonWriter.WritePropertyName("orientation");
-                jsonWriter.WriteValue((int) Orientation);
+                jsonWriter.WriteValue((int)Orientation);
             }
 
             if (Flags != 0) {
@@ -650,7 +701,7 @@ namespace Blueprints {
                     }
                 }
 
-                Orientation = (Orientation) binaryReader.ReadInt32();
+                Orientation = (Orientation)binaryReader.ReadInt32();
                 Flags = binaryReader.ReadInt32();
                 return true;
             }
@@ -699,7 +750,7 @@ namespace Blueprints {
             }
 
             if (orientationToken != null && orientationToken.Type == JTokenType.Integer) {
-                Orientation = (Orientation) orientationToken.Value<int>();
+                Orientation = (Orientation)orientationToken.Value<int>();
             }
 
             if (flagsToken != null && flagsToken.Type == JTokenType.Integer) {

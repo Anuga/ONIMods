@@ -1,7 +1,4 @@
 ﻿using Harmony;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using STRINGS;
 using System.Collections.Generic;
 using System.IO;
 using TMPro;
@@ -29,6 +26,33 @@ namespace Blueprints {
             return folderLocation;
         }
 
+        public static bool AttachFileWatcher() {
+            string blueprintDirectory = GetBlueprintDirectory();
+
+            BlueprintsAssets.BLUEPRINTS_AUTOFILE_WATCHER = new FileSystemWatcher {
+                Path = blueprintDirectory,
+                IncludeSubdirectories = true,
+                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime,
+                Filter = "*.*"
+            };
+
+            BlueprintsAssets.BLUEPRINTS_AUTOFILE_WATCHER.Created += (object sender, FileSystemEventArgs eventArgs) => {
+                if (BlueprintsAssets.BLUEPRINTS_AUTOFILE_IGNORE.Contains(eventArgs.FullPath)) {
+                    BlueprintsAssets.BLUEPRINTS_AUTOFILE_IGNORE.Remove(eventArgs.FullPath);
+                    return;
+                }
+
+                if (eventArgs.FullPath.EndsWith(".blueprint") || eventArgs.FullPath.EndsWith(".json")) {
+                    if (LoadBlueprint(eventArgs.FullPath, out Blueprint blueprint)) {
+                        PlaceIntoFolder(blueprint);
+                    }
+                }
+            };
+
+            BlueprintsAssets.BLUEPRINTS_AUTOFILE_WATCHER.EnableRaisingEvents = true;
+            return false;
+        }
+
         public static void ReloadBlueprints(bool ingame) {
             BlueprintsState.LoadedBlueprints.Clear();
             LoadFolder(GetBlueprintDirectory());
@@ -45,22 +69,7 @@ namespace Blueprints {
 
             foreach (string file in files) {
                 if (file.EndsWith(".blueprint") || file.EndsWith(".json")) {
-                    Blueprint blueprint = new Blueprint(file);
-                    bool valid = false;
-
-                    if (blueprint.ReadBinary() && !blueprint.IsEmpty()) {
-                        valid = true;
-                    }
-
-                    else {
-                        blueprint.ReadJSON();
-
-                        if (!blueprint.IsEmpty()) {
-                            valid = true;
-                        }
-                    }
-
-                    if (valid) {
+                    if (LoadBlueprint(file, out Blueprint blueprint)) {
                         PlaceIntoFolder(blueprint);
                     }
                 }
@@ -69,6 +78,15 @@ namespace Blueprints {
             foreach (string subfolder in subfolders) {
                 LoadFolder(subfolder);
             }
+        }
+
+        public static bool LoadBlueprint(string blueprintLocation, out Blueprint blueprint) {
+            blueprint = new Blueprint(blueprintLocation);
+            if (!blueprint.ReadBinary()) {
+                blueprint.ReadJSON();
+            }
+
+            return !blueprint.IsEmpty();
         }
 
         public static void PlaceIntoFolder(Blueprint blueprint) {

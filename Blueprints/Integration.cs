@@ -86,6 +86,7 @@ namespace Blueprints {
                 BlueprintsStrings.STRING_BLUEPRINTS_FOLDERBLUEPRINT_TITLE, "ASSIGN FOLDER"
             };
 
+            Utilities.AttachFileWatcher();
             Debug.Log("Blueprints Loaded: Version " + currentAssembly.GetName().Version);
         }
 
@@ -210,6 +211,8 @@ namespace Blueprints {
                 CreateBlueprintTool.DestroyInstance();
                 UseBlueprintTool.DestroyInstance();
                 SnapshotTool.DestroyInstance();
+
+                BlueprintsAssets.BLUEPRINTS_AUTOFILE_WATCHER.Dispose();
             }
         }
 

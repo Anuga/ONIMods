@@ -1,10 +1,10 @@
 ﻿using Harmony;
-using PeterHan.PLib.UI;
+using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
 namespace Blueprints {
-    public sealed class SnapshotTool : FilteredDragTool {
+    public sealed class SnapshotTool : MultiFilteredDragTool {
         private Blueprint blueprint = null;
 
         public static SnapshotTool Instance { get; private set; }
@@ -52,7 +52,9 @@ namespace Blueprints {
             blueprint = null;
 
             gameObject.GetComponent<SnapshotToolHoverCard>().UsingSnapshot = false;
-            ToolMenu.Instance.toolParameterMenu.gameObject.SetActive(true);
+
+            MultiToolParameterMenu.Instance.PopulateMenu(GetDefaultFilters());
+            MultiToolParameterMenu.Instance.ShowMenu();
             ToolMenu.Instance.PriorityScreen.Show(false);
             BlueprintsState.ClearVisuals();
 
@@ -95,7 +97,7 @@ namespace Blueprints {
             BlueprintsState.ClearVisuals();
             blueprint = null;
 
-            ToolMenu.Instance.toolParameterMenu.gameObject.SetActive(true);
+            MultiToolParameterMenu.Instance.HideMenu();
             ToolMenu.Instance.PriorityScreen.Show(false);
             GridCompositor.Instance.ToggleMajor(false);
         }
@@ -115,7 +117,7 @@ namespace Blueprints {
                     Util.Swap(ref y0, ref y1);
                 }
 
-                Blueprint blueprint = BlueprintsState.CreateBlueprint(new Vector2I(x0, y0), new Vector2I(x1, y1), this);
+                Blueprint blueprint = BlueprintsState.CreateBlueprint(new Vector2I(x0, y0), new Vector2I(x1, y1), MultiToolParameterMenu.Instance);
                 if (blueprint.IsEmpty()) {
                     PopFXManager.Instance.SpawnFX(BlueprintsAssets.BLUEPRINTS_CREATE_ICON_SPRITE, Strings.Get(BlueprintsStrings.STRING_BLUEPRINTS_SNAPSHOT_EMPTY), null, PlayerController.GetCursorPos(KInputManager.GetMousePos()), BlueprintsAssets.Options.FXTime);
                 }
@@ -123,7 +125,7 @@ namespace Blueprints {
                 else {
                     BlueprintsState.VisualizeBlueprint(Grid.PosToXY(PlayerController.GetCursorPos(KInputManager.GetMousePos())), blueprint);
 
-                    ToolMenu.Instance.toolParameterMenu.gameObject.SetActive(false);
+                    MultiToolParameterMenu.Instance.HideMenu();
                     ToolMenu.Instance.PriorityScreen.Show(true);
 
                     gameObject.GetComponent<SnapshotToolHoverCard>().UsingSnapshot = true;
@@ -169,6 +171,20 @@ namespace Blueprints {
             }
 
             base.OnKeyDown(buttonEvent);
+        }
+
+        protected override Dictionary<string, ToolParameterMenu.ToggleState> GetDefaultFilters() {
+            return new Dictionary<string, ToolParameterMenu.ToggleState> {
+                { ToolParameterMenu.FILTERLAYERS.WIRES, ToolParameterMenu.ToggleState.On },
+                { ToolParameterMenu.FILTERLAYERS.LIQUIDCONDUIT, ToolParameterMenu.ToggleState.On },
+                { ToolParameterMenu.FILTERLAYERS.GASCONDUIT, ToolParameterMenu.ToggleState.On },
+                { ToolParameterMenu.FILTERLAYERS.SOLIDCONDUIT, ToolParameterMenu.ToggleState.On },
+                { ToolParameterMenu.FILTERLAYERS.BUILDINGS, ToolParameterMenu.ToggleState.On },
+                { ToolParameterMenu.FILTERLAYERS.LOGIC, ToolParameterMenu.ToggleState.On },
+                { ToolParameterMenu.FILTERLAYERS.BACKWALL, ToolParameterMenu.ToggleState.On },
+                { ToolParameterMenu.FILTERLAYERS.DIGPLACER, ToolParameterMenu.ToggleState.On },
+                { BlueprintsStrings.STRING_BLUEPRINTS_MULTIFILTER_GASTILES, ToolParameterMenu.ToggleState.On },
+            };
         }
     }
 }

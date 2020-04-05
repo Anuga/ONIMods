@@ -83,7 +83,10 @@ namespace Blueprints {
                 BlueprintsStrings.STRING_BLUEPRINTS_SNAPSHOT_NEWSNAPSHOT, "Press {0} to take new snapshot.",
       
                 BlueprintsStrings.STRING_BLUEPRINTS_NAMEBLUEPRINT_TITLE, "NAME BLUEPRINT",
-                BlueprintsStrings.STRING_BLUEPRINTS_FOLDERBLUEPRINT_TITLE, "ASSIGN FOLDER"
+                BlueprintsStrings.STRING_BLUEPRINTS_FOLDERBLUEPRINT_TITLE, "ASSIGN FOLDER",
+                "STRINGS.UI.TOOLS.FILTERLAYERS." + BlueprintsStrings.STRING_BLUEPRINTS_MULTIFILTER_GASTILES, "Gas Tiles",
+                BlueprintsStrings.STRING_BLUEPRINTS_MULTIFILTER_ALL, "All",
+                BlueprintsStrings.STRING_BLUEPRINTS_MULTIFILTER_NONE, "None"
             };
 
             Utilities.AttachFileWatcher();
@@ -126,38 +129,29 @@ namespace Blueprints {
             public static void Postfix(PlayerController __instance) {
                 List<InterfaceTool> interfaceTools = new List<InterfaceTool>(__instance.tools);
 
-
-                GameObject createBlueprintTool = new GameObject(BlueprintsAssets.BLUEPRINTS_CREATE_TOOLNAME);
-                createBlueprintTool.AddComponent<CreateBlueprintTool>();
-
+                GameObject createBlueprintTool = new GameObject(BlueprintsAssets.BLUEPRINTS_CREATE_TOOLNAME, typeof(CreateBlueprintTool));
                 createBlueprintTool.transform.SetParent(__instance.gameObject.transform);
                 createBlueprintTool.gameObject.SetActive(true);
                 createBlueprintTool.gameObject.SetActive(false);
 
                 interfaceTools.Add(createBlueprintTool.GetComponent<InterfaceTool>());
 
-
-                GameObject useBlueprintTool = new GameObject(BlueprintsAssets.BLUEPRINTS_USE_TOOLNAME);
-                useBlueprintTool.AddComponent<UseBlueprintTool>();
-
+                GameObject useBlueprintTool = new GameObject(BlueprintsAssets.BLUEPRINTS_USE_TOOLNAME, typeof(UseBlueprintTool));
                 useBlueprintTool.transform.SetParent(__instance.gameObject.transform);
                 useBlueprintTool.gameObject.SetActive(true);
                 useBlueprintTool.gameObject.SetActive(false);
 
                 interfaceTools.Add(useBlueprintTool.GetComponent<InterfaceTool>());
 
-
-                GameObject snapshotTool = new GameObject(BlueprintsAssets.BLUEPRINTS_SNAPSHOT_TOOLNAME);
-                snapshotTool.AddComponent<SnapshotTool>();
-
+                GameObject snapshotTool = new GameObject(BlueprintsAssets.BLUEPRINTS_SNAPSHOT_TOOLNAME, typeof(SnapshotTool));
                 snapshotTool.transform.SetParent(__instance.gameObject.transform);
                 snapshotTool.gameObject.SetActive(true);
                 snapshotTool.gameObject.SetActive(false);
 
                 interfaceTools.Add(snapshotTool.GetComponent<InterfaceTool>());
 
-
                 __instance.tools = interfaceTools.ToArray();
+
 
                 BlueprintsAssets.Options = POptions.ReadSettings<BlueprintsOptions>() ?? new BlueprintsOptions();
             }
@@ -169,6 +163,8 @@ namespace Blueprints {
                 ___icons.Add(BlueprintsAssets.BLUEPRINTS_CREATE_ICON_SPRITE);
                 ___icons.Add(BlueprintsAssets.BLUEPRINTS_USE_ICON_SPRITE);
                 ___icons.Add(BlueprintsAssets.BLUEPRINTS_SNAPSHOT_ICON_SPRITE);
+
+                MultiToolParameterMenu.CreateInstance();
             }
         }
 
@@ -211,6 +207,7 @@ namespace Blueprints {
                 CreateBlueprintTool.DestroyInstance();
                 UseBlueprintTool.DestroyInstance();
                 SnapshotTool.DestroyInstance();
+                MultiToolParameterMenu.DestroyInstance();
 
                 BlueprintsAssets.BLUEPRINTS_AUTOFILE_WATCHER.Dispose();
             }

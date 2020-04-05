@@ -1,8 +1,5 @@
 ﻿using Harmony;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using PeterHan.PLib;
-using STRINGS;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -50,6 +47,10 @@ namespace Blueprints {
 
         public const string STRING_BLUEPRINTS_NAMEBLUEPRINT_TITLE = "BLUEPRINTS.NAMEBLUEPRINT.TITLE";
         public const string STRING_BLUEPRINTS_FOLDERBLUEPRINT_TITLE = "BLUEPRINTS.FOLDERBLUEPRINT.TITLE";
+
+        public const string STRING_BLUEPRINTS_MULTIFILTER_GASTILES = "BLUEPRINTS_GASTILES";
+        public const string STRING_BLUEPRINTS_MULTIFILTER_NONE = "BLUEPRINTS.MULTIFILTER.NONE";
+        public const string STRING_BLUEPRINTS_MULTIFILTER_ALL = "BLUEPRINTS.MULTIFILTER.ALL";
     }
 
     public static class BlueprintsAssets {
@@ -148,9 +149,11 @@ namespace Blueprints {
             return false;
         }
 
-        public static Blueprint CreateBlueprint(Vector2I topLeft, Vector2I bottomRight, FilteredDragTool originTool = null) {
+        public static Blueprint CreateBlueprint(Vector2I topLeft, Vector2I bottomRight, MultiToolParameterMenu filter = null) {
             Blueprint blueprint = new Blueprint("unnamed", "");
+
             int blueprintHeight = (topLeft.y - bottomRight.y);
+            bool collectingGasTiles = filter.IsActiveLayer(BlueprintsStrings.STRING_BLUEPRINTS_MULTIFILTER_GASTILES);
 
             for (int x = topLeft.x; x <= bottomRight.x; ++x) {
                 for (int y = bottomRight.y; y <= topLeft.y; ++y) {
@@ -165,12 +168,16 @@ namespace Blueprints {
                             }
 
                             GameObject gameObject = Grid.Objects[cell, layer];
-                            Building building;
 
-                            if (gameObject != null && (building = gameObject.GetComponent<Building>()) != null && building.Def.IsBuildable() && (originTool == null || originTool.IsActiveLayer(originTool.GetFilterLayerFromGameObject(gameObject)))) {
-                                Deconstructable deconstructable;
-      
-                                if (building.GetComponent<PrimaryElement>() != null && (deconstructable = building.GetComponent<Deconstructable>()) != null) {
+                            if (gameObject != null && (gameObject.GetComponent<Constructable>() != null || gameObject.GetComponent<Deconstructable>() != null)) {
+                                Building building;
+
+                                bool validBuilding = (building = gameObject.GetComponent<Building>()) != null;
+                                if (!validBuilding && (building = gameObject.GetComponent<BuildingUnderConstruction>()) != null) {
+                                    validBuilding = true;
+                                }
+
+                                if (gameObject != null && validBuilding && building.Def.IsBuildable() && (filter == null || filter.IsActiveLayer(MultiToolParameterMenu.GetFilterLayerFromGameObject(gameObject)))) {
                                     Vector2I centre = Grid.CellToXY(GameUtil.NaturalBuildingCell(building));
 
                                     BuildingConfig buildingConfig = new BuildingConfig {
@@ -179,21 +186,29 @@ namespace Blueprints {
                                         Orientation = building.Orientation
                                     };
 
-                                    buildingConfig.SelectedElements.AddRange(deconstructable.constructionElements);
+                                    if (gameObject.GetComponent<Deconstructable>() != null) {
+                                        buildingConfig.SelectedElements.AddRange(gameObject.GetComponent<Deconstructable>().constructionElements);
+                                    }
+
+                                    else {
+                                        buildingConfig.SelectedElements.AddRange(Traverse.Create(gameObject.GetComponent<Constructable>()).Field("selectedElementsTags").GetValue<Tag[]>());
+                                        
+                                    }
+                                    
                                     if (building.Def.BuildingComplete.GetComponent<IHaveUtilityNetworkMgr>() != null) {
-                                        buildingConfig.Flags = (int) building.Def.BuildingComplete.GetComponent<IHaveUtilityNetworkMgr>().GetNetworkManager()?.GetConnections(cell, false);
+                                        buildingConfig.Flags = (int)building.Def.BuildingComplete.GetComponent<IHaveUtilityNetworkMgr>().GetNetworkManager()?.GetConnections(cell, false);
                                     }
 
                                     if (!blueprint.BuildingConfiguration.Contains(buildingConfig)) {
                                         blueprint.BuildingConfiguration.Add(buildingConfig);
                                     }
-                                }
 
-                                emptyCell = false;
+                                    emptyCell = false;
+                                }
                             }
                         }
 
-                        if (emptyCell && (!Grid.IsSolidCell(cell) || Grid.Objects[cell, 7] != null && Grid.Objects[cell, 7].name == "DigPlacer")) {
+                        if (emptyCell && (collectingGasTiles && !Grid.IsSolidCell(cell) || filter.IsActiveLayer(ToolParameterMenu.FILTERLAYERS.DIGPLACER) && Grid.Objects[cell, 7] != null && Grid.Objects[cell, 7].name == "DigPlacer")) {
                             Vector2I digLocation = new Vector2I(x - topLeft.x, blueprintHeight - (topLeft.y - y));
 
                             if (!blueprint.DigLocations.Contains(digLocation)) {

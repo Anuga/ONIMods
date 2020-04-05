@@ -1,9 +1,10 @@
 ﻿using Harmony;
+using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
 namespace Blueprints {
-    public sealed class CreateBlueprintTool : FilteredDragTool {
+    public sealed class CreateBlueprintTool : MultiFilteredDragTool {
         public static CreateBlueprintTool Instance { get; private set; }
 
         public CreateBlueprintTool() {
@@ -67,7 +68,7 @@ namespace Blueprints {
                     Util.Swap(ref y0, ref y1);
                 }
 
-                Blueprint blueprint = BlueprintsState.CreateBlueprint(new Vector2I(x0, y0), new Vector2I(x1, y1), this);
+                Blueprint blueprint = BlueprintsState.CreateBlueprint(new Vector2I(x0, y0), new Vector2I(x1, y1), MultiToolParameterMenu.Instance);
                 if (blueprint.IsEmpty()) {
                     PopFXManager.Instance.SpawnFX(BlueprintsAssets.BLUEPRINTS_CREATE_ICON_SPRITE, Strings.Get(BlueprintsStrings.STRING_BLUEPRINTS_CREATE_EMPTY), null, PlayerController.GetCursorPos(KInputManager.GetMousePos()), BlueprintsAssets.Options.FXTime);
                 }
@@ -96,6 +97,20 @@ namespace Blueprints {
                     blueprintNameDialog.Activate();
                 }
             }
+        }
+
+        protected override Dictionary<string, ToolParameterMenu.ToggleState> GetDefaultFilters() {
+            return new Dictionary<string, ToolParameterMenu.ToggleState> {
+                { ToolParameterMenu.FILTERLAYERS.WIRES, ToolParameterMenu.ToggleState.On },
+                { ToolParameterMenu.FILTERLAYERS.LIQUIDCONDUIT, ToolParameterMenu.ToggleState.On },
+                { ToolParameterMenu.FILTERLAYERS.GASCONDUIT, ToolParameterMenu.ToggleState.On },
+                { ToolParameterMenu.FILTERLAYERS.SOLIDCONDUIT, ToolParameterMenu.ToggleState.On },
+                { ToolParameterMenu.FILTERLAYERS.BUILDINGS, ToolParameterMenu.ToggleState.On },
+                { ToolParameterMenu.FILTERLAYERS.LOGIC, ToolParameterMenu.ToggleState.On },
+                { ToolParameterMenu.FILTERLAYERS.BACKWALL, ToolParameterMenu.ToggleState.On },
+                { ToolParameterMenu.FILTERLAYERS.DIGPLACER, ToolParameterMenu.ToggleState.On },
+                { BlueprintsStrings.STRING_BLUEPRINTS_MULTIFILTER_GASTILES, ToolParameterMenu.ToggleState.On },
+            };
         }
     }
 }

@@ -15,6 +15,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModLocalization", "Lib\ModL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilterableHarvestTool", "FilterableHarvestTool\FilterableHarvestTool.csproj", "{4EA41AE6-1917-4DAA-9B30-CAB341477F81}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiFiltration", "Lib\ModMultiFiltration\MultiFiltration.csproj", "{6D6DD776-B4B9-4362-BE45-2C47D4AB4178}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdvancedFilterMenu", "AdvancedFilterMenu\AdvancedFilterMenu.csproj", "{F04C357D-7FB9-481E-A383-667CFE15AB2D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +49,14 @@ Global
 		{4EA41AE6-1917-4DAA-9B30-CAB341477F81}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4EA41AE6-1917-4DAA-9B30-CAB341477F81}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4EA41AE6-1917-4DAA-9B30-CAB341477F81}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D6DD776-B4B9-4362-BE45-2C47D4AB4178}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D6DD776-B4B9-4362-BE45-2C47D4AB4178}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D6DD776-B4B9-4362-BE45-2C47D4AB4178}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D6DD776-B4B9-4362-BE45-2C47D4AB4178}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F04C357D-7FB9-481E-A383-667CFE15AB2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F04C357D-7FB9-481E-A383-667CFE15AB2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F04C357D-7FB9-481E-A383-667CFE15AB2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F04C357D-7FB9-481E-A383-667CFE15AB2D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

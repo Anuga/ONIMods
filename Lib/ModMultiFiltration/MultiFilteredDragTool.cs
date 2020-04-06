@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Blueprints {
+namespace ModFramework {
     public class MultiFilteredDragTool : DragTool {
         protected Dictionary<string, ToolParameterMenu.ToggleState> defaultParameters = new Dictionary<string, ToolParameterMenu.ToggleState>();
 

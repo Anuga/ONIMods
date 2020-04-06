@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace Blueprints {
+namespace ModFramework {
     [AddComponentMenu("KMonoBehaviour/scripts/ToolParameterMenu")]
-    public sealed class MultiToolParameterMenu : KMonoBehaviour {
+    public class MultiToolParameterMenu : KMonoBehaviour {
         public static MultiToolParameterMenu Instance;
 
         private readonly Dictionary<string, GameObject> widgets = new Dictionary<string, GameObject>();
         private GameObject content;
         private GameObject widgetContainer;
-        private Dictionary<string, ToolParameterMenu.ToggleState> parameters;            
+        private Dictionary<string, ToolParameterMenu.ToggleState> parameters;
 
         protected override void OnPrefabInit() {
             base.OnPrefabInit();
@@ -25,7 +25,7 @@ namespace Blueprints {
             PRelativePanel buttonsPanel = new PRelativePanel();
 
             PButton allButton = new PButton {
-                Text = Strings.Get(BlueprintsStrings.STRING_BLUEPRINTS_MULTIFILTER_ALL)
+                Text = "All"
             };
 
             allButton.OnClick += (GameObject source) => {
@@ -33,7 +33,7 @@ namespace Blueprints {
             };
 
             PButton noneButton = new PButton {
-                Text = Strings.Get(BlueprintsStrings.STRING_BLUEPRINTS_MULTIFILTER_NONE)
+                Text = "None"
             };
 
             noneButton.OnClick += (GameObject source) => {
@@ -85,7 +85,7 @@ namespace Blueprints {
                             if (this.parameters[widget.Key] == ToolParameterMenu.ToggleState.Disabled) {
                                 break;
                             }
-                            
+
                             if (this.parameters[widget.Key] == ToolParameterMenu.ToggleState.On) {
                                 this.parameters[widget.Key] = ToolParameterMenu.ToggleState.Off;
                             }
@@ -110,6 +110,16 @@ namespace Blueprints {
             return parameters.ContainsKey(layer.ToUpper()) && parameters[layer.ToUpper()] == ToolParameterMenu.ToggleState.On;
         }
 
+        public bool IsActiveLayer(ObjectLayer layer) {
+            foreach (KeyValuePair<string, ToolParameterMenu.ToggleState> parameter in parameters) {
+                if (parameter.Value == ToolParameterMenu.ToggleState.On && GetObjectLayerFromFilterLayer(parameter.Key) == layer) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public void SetAll(ToolParameterMenu.ToggleState toggleState) {
             foreach (string key in parameters.Keys.ToList()) {
                 parameters[key] = toggleState;
@@ -132,7 +142,7 @@ namespace Blueprints {
             if (gameObject.GetComponent<Clearable>() != null || gameObject.GetComponent<Moppable>() != null) {
                 return "CleanAndClear";
             }
-                
+
             return gameObject.GetComponent<Diggable>() != null ? "DigPlacer" : "Default";
         }
 
@@ -171,6 +181,36 @@ namespace Blueprints {
             return "Default";
         }
 
+        private ObjectLayer GetObjectLayerFromFilterLayer(string filterLayer) {
+            switch (filterLayer.ToLower()) {
+                case "backwall":
+                    return ObjectLayer.Backwall;
+
+                case "buildings":
+                    return ObjectLayer.Building;
+
+                case "gaspipes":
+                    return ObjectLayer.GasConduit;
+
+                case "liquidpipes":
+                    return ObjectLayer.LiquidConduit;
+
+                case "logic":
+                    return ObjectLayer.LogicWire;
+
+                case "solidconduits":
+                    return ObjectLayer.SolidConduit;
+
+                case "tiles":
+                    return ObjectLayer.FoundationTile;
+
+                case "wires":
+                    return ObjectLayer.Wire;
+            }
+
+            return ObjectLayer.AttachableBuilding;
+        }
+
         private void OnChange() {
             foreach (KeyValuePair<string, GameObject> widget in widgets) {
                 switch (parameters[widget.Key]) {
@@ -195,7 +235,7 @@ namespace Blueprints {
             foreach (KeyValuePair<string, GameObject> widget in widgets) {
                 Util.KDestroyGameObject(widget.Value);
             }
-                
+
             widgets.Clear();
         }
 

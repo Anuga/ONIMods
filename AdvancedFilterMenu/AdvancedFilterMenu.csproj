@@ -74,7 +74,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>"$(SolutionDir)packages\ILMerge.3.0.29\tools\net452\ILMerge.exe" /out:AdvancedFilterMenu.dll UnmergedAdvancedFilterMenu.dll DisplayVersion.dll PLib.dll /targetplatform:v4
+    <PostBuildEvent>"$(SolutionDir)packages\ILMerge.3.0.29\tools\net452\ILMerge.exe" /out:AdvancedFilterMenu.dll UnmergedAdvancedFilterMenu.dll DisplayVersion.dll UnmergedMultiFiltration.dll PLib.dll /targetplatform:v4
 xcopy /y  "$(TargetDir)AdvancedFilterMenu.dll" "%25USERPROFILE%25\Documents\Klei\OxygenNotIncluded\mods\Local\AdvancedFilterMenu LOCAL\"
 
 </PostBuildEvent>

@@ -152,19 +152,34 @@ namespace Blueprints {
 
                 __instance.tools = interfaceTools.ToArray();
 
-
                 BlueprintsAssets.Options = POptions.ReadSettings<BlueprintsOptions>() ?? new BlueprintsOptions();
+                CreateBlueprintTool.Instance.OverlaySynced = BlueprintsAssets.Options.CreateBlueprintToolSync;
+                SnapshotTool.Instance.OverlaySynced = BlueprintsAssets.Options.SnapshotToolSync;
             }
         }
 
         [HarmonyPatch(typeof(ToolMenu), "OnPrefabInit")]
         public static class ToolMenu_OnPrefabInit {
-            public static void Postfix(ToolMenu __instance, List<Sprite> ___icons) {
+            public static void Postfix(List<Sprite> ___icons) {
                 ___icons.Add(BlueprintsAssets.BLUEPRINTS_CREATE_ICON_SPRITE);
                 ___icons.Add(BlueprintsAssets.BLUEPRINTS_USE_ICON_SPRITE);
                 ___icons.Add(BlueprintsAssets.BLUEPRINTS_SNAPSHOT_ICON_SPRITE);
 
                 MultiToolParameterMenu.CreateInstance();
+                ToolParameterMenu.ToggleState defaultSelection = BlueprintsAssets.Options.DefaultMenuSelections == DefaultSelections.All ? ToolParameterMenu.ToggleState.On : ToolParameterMenu.ToggleState.Off;
+
+                SnapshotTool.Instance.DefaultParameters = 
+                CreateBlueprintTool.Instance.DefaultParameters = new Dictionary<string, ToolParameterMenu.ToggleState> {
+                    { ToolParameterMenu.FILTERLAYERS.WIRES, defaultSelection },
+                    { ToolParameterMenu.FILTERLAYERS.LIQUIDCONDUIT, defaultSelection },
+                    { ToolParameterMenu.FILTERLAYERS.GASCONDUIT, defaultSelection },
+                    { ToolParameterMenu.FILTERLAYERS.SOLIDCONDUIT, defaultSelection },
+                    { ToolParameterMenu.FILTERLAYERS.BUILDINGS, defaultSelection },
+                    { ToolParameterMenu.FILTERLAYERS.LOGIC, defaultSelection },
+                    { ToolParameterMenu.FILTERLAYERS.BACKWALL, defaultSelection },
+                    { ToolParameterMenu.FILTERLAYERS.DIGPLACER, defaultSelection},
+                    { BlueprintsStrings.STRING_BLUEPRINTS_MULTIFILTER_GASTILES, defaultSelection },
+                };
             }
         }
 

@@ -11,5 +11,7 @@
 
         public static string ADVANCEDFILTERMENU_EMPTYPIPE_TOOLNAME = "AdvancedFilterMenuExtractPipeTool";
         public static ToolMenu.ToolCollection ADVANCEDFILTERMENU_EMPTYPIPE_TOOLCOLLECTION;
+
+        public static AdvancedFilterMenuOptions Options;
     }
 }

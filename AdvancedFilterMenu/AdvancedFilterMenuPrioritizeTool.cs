@@ -1,6 +1,6 @@
 ﻿using Harmony;
 using ModFramework;
-using System.Collections.Generic;
+using PeterHan.PLib.Options;
 using System.Reflection;
 using UnityEngine;
 
@@ -36,15 +36,6 @@ namespace AdvancedFilterMenu {
             gameObject.AddComponent<CancelToolHoverTextCard>();
 
             viewMode = OverlayModes.Priorities.ID;
-        }
-
-        protected override Dictionary<string, ToolParameterMenu.ToggleState> GetDefaultFilters() {
-            return new Dictionary<string, ToolParameterMenu.ToggleState> {
-                { ToolParameterMenu.FILTERLAYERS.CONSTRUCTION, ToolParameterMenu.ToggleState.On },
-                { ToolParameterMenu.FILTERLAYERS.DIG, ToolParameterMenu.ToggleState.On },
-                { ToolParameterMenu.FILTERLAYERS.CLEAN, ToolParameterMenu.ToggleState.On },
-                { ToolParameterMenu.FILTERLAYERS.OPERATE, ToolParameterMenu.ToggleState.On }
-            };
         }
 
         private bool TryPrioritizeGameObject(GameObject target, PrioritySetting priority) {
@@ -139,6 +130,13 @@ namespace AdvancedFilterMenu {
             if (meshRenderer != null) {
                 meshRenderer.material.mainTexture = cursor;
             }
+        }
+
+        protected override void OnSyncChanged(bool synced) {
+            base.OnSyncChanged(synced);
+
+            AdvancedFiltrationAssets.Options.PrioritizeSync = synced;
+            POptions.WriteSettings(AdvancedFiltrationAssets.Options);
         }
     }
 }

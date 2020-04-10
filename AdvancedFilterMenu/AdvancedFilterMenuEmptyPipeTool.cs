@@ -1,6 +1,6 @@
 ﻿using Harmony;
 using ModFramework;
-using System.Collections.Generic;
+using PeterHan.PLib.Options;
 using System.Reflection;
 using UnityEngine;
 
@@ -36,14 +36,6 @@ namespace AdvancedFilterMenu {
 
             areaVisualizerField.SetValue(this, areaVisualizer);
             gameObject.AddComponent<CancelToolHoverTextCard>();
-        }
-
-        protected override Dictionary<string, ToolParameterMenu.ToggleState> GetDefaultFilters() {
-            return new Dictionary<string, ToolParameterMenu.ToggleState> {
-                { ToolParameterMenu.FILTERLAYERS.LIQUIDCONDUIT, ToolParameterMenu.ToggleState.On },
-                { ToolParameterMenu.FILTERLAYERS.GASCONDUIT, ToolParameterMenu.ToggleState.On },
-                { ToolParameterMenu.FILTERLAYERS.SOLIDCONDUIT, ToolParameterMenu.ToggleState.On }
-            };
         }
 
         protected override void OnDragTool(int cell, int distFromOrigin) {
@@ -83,6 +75,13 @@ namespace AdvancedFilterMenu {
             base.OnDeactivateTool(newTool);
 
             ToolMenu.Instance.PriorityScreen.Show(false);
+        }
+
+        protected override void OnSyncChanged(bool synced) {
+            base.OnSyncChanged(synced);
+
+            AdvancedFiltrationAssets.Options.EmptyPipeSync = synced;
+            POptions.WriteSettings(AdvancedFiltrationAssets.Options);
         }
     }
 }

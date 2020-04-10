@@ -1,6 +1,6 @@
 ﻿using Harmony;
 using ModFramework;
-using System.Collections.Generic;
+using PeterHan.PLib.Options;
 using System.Reflection;
 using UnityEngine;
 
@@ -63,6 +63,13 @@ namespace AdvancedFilterMenu {
             base.OnDeactivateTool(newTool);
 
             ToolMenu.Instance.PriorityScreen.Show(false);
+        }
+
+        protected override void OnSyncChanged(bool synced) {
+            base.OnSyncChanged(synced);
+
+            AdvancedFiltrationAssets.Options.DeconstructToolSync = synced;
+            POptions.WriteSettings(AdvancedFiltrationAssets.Options);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Harmony;
 using ModFramework;
-using System.Collections.Generic;
+using PeterHan.PLib.Options;
 using System.Reflection;
 using UnityEngine;
 
@@ -38,20 +38,6 @@ namespace AdvancedFilterMenu {
             gameObject.AddComponent<CancelToolHoverTextCard>();
         }
 
-        protected override Dictionary<string, ToolParameterMenu.ToggleState> GetDefaultFilters() {
-            return new Dictionary<string, ToolParameterMenu.ToggleState> {
-                { ToolParameterMenu.FILTERLAYERS.WIRES, ToolParameterMenu.ToggleState.On },
-                { ToolParameterMenu.FILTERLAYERS.LIQUIDCONDUIT, ToolParameterMenu.ToggleState.On },
-                { ToolParameterMenu.FILTERLAYERS.GASCONDUIT, ToolParameterMenu.ToggleState.On },
-                { ToolParameterMenu.FILTERLAYERS.SOLIDCONDUIT, ToolParameterMenu.ToggleState.On },
-                { ToolParameterMenu.FILTERLAYERS.BUILDINGS, ToolParameterMenu.ToggleState.On },
-                { ToolParameterMenu.FILTERLAYERS.LOGIC, ToolParameterMenu.ToggleState.On },
-                { ToolParameterMenu.FILTERLAYERS.BACKWALL, ToolParameterMenu.ToggleState.On },
-                { ToolParameterMenu.FILTERLAYERS.CLEANANDCLEAR, ToolParameterMenu.ToggleState.On },
-                { ToolParameterMenu.FILTERLAYERS.DIGPLACER, ToolParameterMenu.ToggleState.On }
-            };
-        }
-
         protected override void OnDragTool(int cell, int distFromOrigin) {
             for (int index = 0; index < 40; ++index) {
                 GameObject gameObject = Grid.Objects[cell, index];
@@ -68,6 +54,13 @@ namespace AdvancedFilterMenu {
 
             AttackTool.MarkForAttack(regularizedPos1, regularizedPos2, false);
             CaptureTool.MarkForCapture(regularizedPos1, regularizedPos2, false);
+        }
+
+        protected override void OnSyncChanged(bool synced) {
+            base.OnSyncChanged(synced);
+
+            AdvancedFiltrationAssets.Options.CancelToolSync = synced;
+            POptions.WriteSettings(AdvancedFiltrationAssets.Options);
         }
     }
 }

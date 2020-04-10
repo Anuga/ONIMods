@@ -1,35 +1,116 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace ModFramework {
     public class MultiFilteredDragTool : DragTool {
-        protected Dictionary<string, ToolParameterMenu.ToggleState> defaultParameters = new Dictionary<string, ToolParameterMenu.ToggleState>();
+        public virtual Dictionary<string, ToolParameterMenu.ToggleState> DefaultParameters { get; set; } = new Dictionary<string, ToolParameterMenu.ToggleState>();
+        public virtual bool OverlaySynced { get; set; } = false;
+
+        private Dictionary<string, ToolParameterMenu.ToggleState> cachedParameters;
+        private bool isSynced = false;
 
         protected override void OnActivateTool() {
             base.OnActivateTool();
 
-            defaultParameters = GetDefaultFilters();
-
-            MultiToolParameterMenu.Instance.PopulateMenu(defaultParameters);
+            MultiToolParameterMenu.Instance.PopulateMenu(DefaultParameters);
+            MultiToolParameterMenu.Instance.SetOverlaySync(OverlaySynced);
+            MultiToolParameterMenu.Instance.OnSyncChanged += OnSyncChanged;
             MultiToolParameterMenu.Instance.ShowMenu();
+
+            OverlayScreen.Instance.OnOverlayChanged += OnOverlayChanged;
+            OnOverlayChanged(OverlayScreen.Instance.mode);
         }
 
         protected override void OnDeactivateTool(InterfaceTool newTool) {
             base.OnDeactivateTool(newTool);
 
-            MultiToolParameterMenu.Instance.ClearMenu();
+            cachedParameters = null;
+            OverlayScreen.Instance.OnOverlayChanged -= OnOverlayChanged;
+
             MultiToolParameterMenu.Instance.HideMenu();
+            MultiToolParameterMenu.Instance.ClearMenu();
+            MultiToolParameterMenu.Instance.OnSyncChanged -= OnSyncChanged;
         }
 
-        protected virtual Dictionary<string, ToolParameterMenu.ToggleState> GetDefaultFilters() {
-            return new Dictionary<string, ToolParameterMenu.ToggleState> {
-                { ToolParameterMenu.FILTERLAYERS.WIRES, ToolParameterMenu.ToggleState.On },
-                { ToolParameterMenu.FILTERLAYERS.LIQUIDCONDUIT, ToolParameterMenu.ToggleState.On },
-                { ToolParameterMenu.FILTERLAYERS.GASCONDUIT, ToolParameterMenu.ToggleState.On },
-                { ToolParameterMenu.FILTERLAYERS.SOLIDCONDUIT, ToolParameterMenu.ToggleState.On },
-                { ToolParameterMenu.FILTERLAYERS.BUILDINGS, ToolParameterMenu.ToggleState.On },
-                { ToolParameterMenu.FILTERLAYERS.LOGIC, ToolParameterMenu.ToggleState.On },
-                { ToolParameterMenu.FILTERLAYERS.BACKWALL, ToolParameterMenu.ToggleState.On }
-            };
+        protected virtual void OnSyncChanged(bool synced) {
+            OverlaySynced = synced;
+
+            if (!synced) {
+                SetSynced(false);
+            }
+        }
+
+        protected virtual void OnOverlayChanged(HashedString overlay) {
+            if (OverlaySynced) {
+                if (overlay == null) {
+                    SetSynced(false);
+                }
+
+                else {
+                    string filter = null;
+
+                    if (overlay == OverlayModes.Power.ID) {
+                        filter = ToolParameterMenu.FILTERLAYERS.WIRES;
+                    }
+
+                    else if (overlay == OverlayModes.LiquidConduits.ID) {
+                        filter = ToolParameterMenu.FILTERLAYERS.LIQUIDCONDUIT;
+                    }
+
+                    else if (overlay == OverlayModes.GasConduits.ID) {
+                        filter = ToolParameterMenu.FILTERLAYERS.GASCONDUIT;
+                    }
+
+                    else if (overlay == OverlayModes.SolidConveyor.ID) {
+                        filter = ToolParameterMenu.FILTERLAYERS.SOLIDCONDUIT;
+                    }
+
+                    else if (overlay == OverlayModes.Logic.ID) {
+                        filter = ToolParameterMenu.FILTERLAYERS.LOGIC;
+                    }
+
+                    if (filter == null) {
+                        SetSynced(false);
+                    }
+
+                    else {
+                        Dictionary<string, ToolParameterMenu.ToggleState> parameters = new Dictionary<string, ToolParameterMenu.ToggleState>(DefaultParameters);
+                        foreach (string parameter in parameters.Keys.ToArray()) {
+                            parameters[parameter] = ToolParameterMenu.ToggleState.Disabled;
+
+                            if (parameter == filter) {
+                                parameters[parameter] = ToolParameterMenu.ToggleState.On;
+                            }
+                        }
+
+                        SetSynced(true);
+                        MultiToolParameterMenu.Instance.PopulateMenu(parameters);
+                    }
+                }
+            }
+        }
+
+        private void SetSynced(bool synced) {
+            if (synced == isSynced) {
+                return;
+            }
+
+            if (synced) {
+                cachedParameters = MultiToolParameterMenu.Instance.GetParameters();
+            }
+
+            else {
+                if (cachedParameters == null) {
+                    MultiToolParameterMenu.Instance.PopulateMenu(DefaultParameters);
+                }
+
+                else {
+                    MultiToolParameterMenu.Instance.PopulateMenu(cachedParameters);
+                    cachedParameters = null;
+                }
+            }
+
+            isSynced = synced;
         }
     }
 }

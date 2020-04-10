@@ -6,12 +6,18 @@ using UnityEngine;
 namespace ModFramework {
     [AddComponentMenu("KMonoBehaviour/scripts/ToolParameterMenu")]
     public class MultiToolParameterMenu : KMonoBehaviour {
+        public delegate void SyncChanged(bool synced);
+
         public static MultiToolParameterMenu Instance;
+
+        public event SyncChanged OnSyncChanged;
 
         private readonly Dictionary<string, GameObject> widgets = new Dictionary<string, GameObject>();
         private GameObject content;
         private GameObject widgetContainer;
         private Dictionary<string, ToolParameterMenu.ToggleState> parameters;
+
+        private MultiToggle syncMultiToggle;
 
         protected override void OnPrefabInit() {
             base.OnPrefabInit();
@@ -22,7 +28,9 @@ namespace ModFramework {
             content = Util.KInstantiateUI(baseContent, baseContent.transform.parent.gameObject, false);
             content.transform.GetChild(1).gameObject.SetActive(false);
 
-            PRelativePanel buttonsPanel = new PRelativePanel();
+            PRelativePanel buttonsPanel = new PRelativePanel {
+                BackColor = PUITuning.Colors.ButtonPinkStyle.inactiveColor
+            };
 
             PButton allButton = new PButton {
                 Text = "All"
@@ -40,16 +48,38 @@ namespace ModFramework {
                 Instance.SetAll(ToolParameterMenu.ToggleState.Off);
             };
 
+            PCheckBox syncCheckBox = new PCheckBox {
+                Text = "Auto. Sync"
+            };
+
+            syncCheckBox.SetKleiPinkStyle();
+            syncCheckBox.OnRealize += (GameObject realized) => {
+                syncMultiToggle = realized.GetComponent<MultiToggle>();
+            };
+            syncCheckBox.OnChecked += (GameObject source, int state) => {
+                if (state == PCheckBox.STATE_UNCHECKED) {
+                    syncMultiToggle.ChangeState(PCheckBox.STATE_CHECKED);
+                }
+
+                else if(state == PCheckBox.STATE_CHECKED) {
+                    syncMultiToggle.ChangeState(PCheckBox.STATE_UNCHECKED);
+                }
+
+                OnSyncChanged?.Invoke(syncMultiToggle.CurrentState == PCheckBox.STATE_CHECKED);
+            };
+
             buttonsPanel.AddChild(allButton);
             buttonsPanel.SetLeftEdge(allButton, 0)
-                .SetRightEdge(allButton, 0.5F);
+                .SetRightEdge(allButton, 0.25F);
 
             buttonsPanel.AddChild(noneButton);
-            buttonsPanel.SetLeftEdge(noneButton, 0.5F)
-                .SetRightEdge(noneButton, 1);
+            buttonsPanel.SetLeftEdge(noneButton, 0.25F)
+                .SetRightEdge(noneButton, 0.5F);
 
-            buttonsPanel.Build();
-
+            buttonsPanel.AddChild(syncCheckBox);
+            buttonsPanel.SetLeftEdge(syncCheckBox, 0.5F)
+                .SetRightEdge(syncCheckBox, 1F);
+         
             widgetContainer = Util.KInstantiateUI(baseWidgetContainer, content, true);
             buttonsPanel.AddTo(content, 3);
 
@@ -126,6 +156,10 @@ namespace ModFramework {
             }
 
             OnChange();
+        }
+
+        public virtual Dictionary<string, ToolParameterMenu.ToggleState> GetParameters() {
+            return new Dictionary<string, ToolParameterMenu.ToggleState>(parameters);
         }
 
         public static string GetFilterLayerFromGameObject(GameObject gameObject) {
@@ -209,6 +243,12 @@ namespace ModFramework {
             }
 
             return ObjectLayer.AttachableBuilding;
+        }
+
+        public void SetOverlaySync(bool synced) {
+            if (syncMultiToggle != null) {
+                syncMultiToggle.ChangeState(synced ? PCheckBox.STATE_CHECKED : PCheckBox.STATE_UNCHECKED);
+            }
         }
 
         private void OnChange() {

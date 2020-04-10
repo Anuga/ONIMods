@@ -1,5 +1,6 @@
 ﻿using Harmony;
 using ModFramework;
+using PeterHan.PLib.Options;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -54,7 +55,7 @@ namespace Blueprints {
 
             gameObject.GetComponent<SnapshotToolHoverCard>().UsingSnapshot = false;
 
-            MultiToolParameterMenu.Instance.PopulateMenu(GetDefaultFilters());
+            MultiToolParameterMenu.Instance.PopulateMenu(DefaultParameters);
             MultiToolParameterMenu.Instance.ShowMenu();
             ToolMenu.Instance.PriorityScreen.Show(false);
             BlueprintsState.ClearVisuals();
@@ -174,18 +175,11 @@ namespace Blueprints {
             base.OnKeyDown(buttonEvent);
         }
 
-        protected override Dictionary<string, ToolParameterMenu.ToggleState> GetDefaultFilters() {
-            return new Dictionary<string, ToolParameterMenu.ToggleState> {
-                { ToolParameterMenu.FILTERLAYERS.WIRES, ToolParameterMenu.ToggleState.On },
-                { ToolParameterMenu.FILTERLAYERS.LIQUIDCONDUIT, ToolParameterMenu.ToggleState.On },
-                { ToolParameterMenu.FILTERLAYERS.GASCONDUIT, ToolParameterMenu.ToggleState.On },
-                { ToolParameterMenu.FILTERLAYERS.SOLIDCONDUIT, ToolParameterMenu.ToggleState.On },
-                { ToolParameterMenu.FILTERLAYERS.BUILDINGS, ToolParameterMenu.ToggleState.On },
-                { ToolParameterMenu.FILTERLAYERS.LOGIC, ToolParameterMenu.ToggleState.On },
-                { ToolParameterMenu.FILTERLAYERS.BACKWALL, ToolParameterMenu.ToggleState.On },
-                { ToolParameterMenu.FILTERLAYERS.DIGPLACER, ToolParameterMenu.ToggleState.On },
-                { BlueprintsStrings.STRING_BLUEPRINTS_MULTIFILTER_GASTILES, ToolParameterMenu.ToggleState.On },
-            };
+        protected override void OnSyncChanged(bool synced) {
+            base.OnSyncChanged(synced);
+
+            BlueprintsAssets.Options.SnapshotToolSync = synced;
+            POptions.WriteSettings(BlueprintsAssets.Options);
         }
     }
 }

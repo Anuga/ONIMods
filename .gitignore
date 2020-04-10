@@ -6,4 +6,4 @@ ILMergeOrder.txt
 packages.config
 packages/
 app.config
-*/PLib.dll
+Lib/PLib.dll

@@ -36,6 +36,7 @@ namespace AdvancedFilterMenu {
             gameObject.AddComponent<CancelToolHoverTextCard>();
 
             viewMode = OverlayModes.Priorities.ID;
+            interceptNumberKeysForPriority = true;
         }
 
         private bool TryPrioritizeGameObject(GameObject target, PrioritySetting priority) {

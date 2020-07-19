@@ -165,6 +165,7 @@
     <EmbeddedResource Include="image_snapshot_button.dds" />
     <EmbeddedResource Include="image_useblueprint_button.dds" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>"$(SolutionDir)packages\ILMerge.3.0.29\tools\net452\ILMerge.exe" /out:Blueprints.dll UnmergedBlueprints.dll DisplayVersion.dll ModLocalization.dll PLib.dll UnmergedMultiFiltration.dll /targetplatform:v4

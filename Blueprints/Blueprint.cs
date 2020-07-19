@@ -625,7 +625,7 @@ namespace Blueprints {
             binaryWriter.Write(BuildingDef.PrefabID);
             binaryWriter.Write(SelectedElements.Count);
             SelectedElements.ForEach(selectedElement => binaryWriter.Write(selectedElement.GetHash()));
-            binaryWriter.Write((int)Orientation);
+            binaryWriter.Write((int) Orientation);
             binaryWriter.Write(Flags);
         }
 

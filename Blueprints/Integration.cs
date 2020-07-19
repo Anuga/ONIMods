@@ -4,7 +4,6 @@ using PeterHan.PLib;
 using PeterHan.PLib.Options;
 using Rendering;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
 using TMPro;
 using UnityEngine;
@@ -14,9 +13,6 @@ namespace Blueprints {
         public static void OnLoad() {
             PUtil.InitLibrary(false);
             POptions.RegisterOptions(typeof(BlueprintsOptions));
-
-            Assembly currentAssembly = Assembly.GetExecutingAssembly();
-            string currentAssemblyDirectory = Path.GetDirectoryName(currentAssembly.Location);
 
             BlueprintsAssets.BLUEPRINTS_CREATE_ICON_SPRITE = Utilities.CreateSpriteDXT5(Assembly.GetExecutingAssembly().GetManifestResourceStream("Blueprints.image_createblueprint_button.dds"), 32, 32);
             BlueprintsAssets.BLUEPRINTS_CREATE_ICON_SPRITE.name = BlueprintsAssets.BLUEPRINTS_CREATE_ICON_NAME;
@@ -90,7 +86,7 @@ namespace Blueprints {
             };
 
             Utilities.AttachFileWatcher();
-            Debug.Log("Blueprints Loaded: Version " + currentAssembly.GetName().Version);
+            Debug.Log("Blueprints Loaded: Version " + Assembly.GetExecutingAssembly().GetName().Version);
         }
 
         private static void ModLocalizedHandler(string languageCode) {
